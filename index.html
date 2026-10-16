@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>สื่อการเรียนรู้ 3 มิติ: โมเดลโลกกินได้ (Edible Earth Model)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Mali:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#4a3350;--mut:#8a7390;--glass:rgba(255,255,255,.62);--edge:rgba(255,255,255,.9);--pink:#ff7eb6;--peach:#ffb48a;--mint:#4fd1a5;--sky:#5db7ff;--sun:#ffc83d;--shadow:0 14px 34px rgba(120,80,140,.18)}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font-family:"Mali",Tahoma,"Noto Sans Thai",sans-serif;color:var(--ink);background:linear-gradient(160deg,#ffe3d1 0%,#ffd6ea 45%,#cfe8ff 100%);background-attachment:fixed;line-height:1.6}
+.app{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(350px,.7fr);gap:16px;padding:16px;min-height:100vh}
+.stage{position:sticky;top:16px;height:calc(100vh - 32px);border-radius:28px;overflow:hidden;border:3px solid #fff;background:linear-gradient(180deg,#bfe4ff,#ffe9f3);box-shadow:var(--shadow)}
+#three{position:absolute;inset:0;width:100%;height:100%;display:block;cursor:grab}
+#three:active{cursor:grabbing}
+.glass{background:var(--glass);border:2px solid var(--edge);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-radius:22px;box-shadow:var(--shadow)}
+.hud{position:absolute;left:14px;top:14px;padding:10px 16px;pointer-events:none}
+.hud b{display:block;font-size:1.1rem}
+.hud span{color:var(--mut);font-size:.82rem}
+.tip{position:absolute;left:14px;bottom:14px;padding:8px 14px;font-size:.8rem;color:var(--mut);pointer-events:none}
+.hot{position:absolute;width:34px;height:34px;margin:-17px 0 0 -17px;border-radius:50%;border:3px solid #fff;color:#fff;font:700 15px "Mali",sans-serif;cursor:pointer;display:grid;place-items:center;padding:0;text-shadow:0 1px 2px rgba(0,0,0,.35);box-shadow:0 4px 10px rgba(80,40,100,.35);animation:bob 2.2s ease-in-out infinite;transition:transform .2s}
+.hot:hover,.hot:focus-visible{transform:scale(1.2);outline:3px solid var(--ink)}
+.hot.off{display:none}
+@keyframes bob{0%,100%{margin-top:-17px}50%{margin-top:-21px}}
+.card{position:absolute;right:14px;top:14px;width:min(330px,calc(100% - 28px));padding:16px 18px;opacity:0;transform:translateY(-14px) scale(.94) rotate(-1deg);pointer-events:none;transition:opacity .35s,transform .45s cubic-bezier(.3,1.6,.5,1);border-left:8px solid var(--pink)}
+.card.show{opacity:1;transform:none;pointer-events:auto}
+.card h3{margin:0 0 8px;font-size:1.1rem}
+.card dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:4px 10px;font-size:.88rem}
+.card dt{font-weight:700;color:var(--mut)}
+.card dd{margin:0}
+.card .x{position:absolute;right:10px;top:6px;background:none;border:0;color:var(--mut);font-size:1.3rem;cursor:pointer}
+.panel{display:flex;flex-direction:column;gap:16px}
+.box{padding:18px 20px}
+.box h2{margin:0 0 10px;font-size:1.1rem}
+.box p{margin:0 0 8px;font-size:.92rem}
+.hint{color:var(--mut);font-size:.84rem}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 4px}
+.tab{border:0;border-radius:99px;padding:8px 16px;font:600 .9rem "Mali",sans-serif;cursor:pointer;background:#fff;color:var(--ink);box-shadow:0 3px 8px rgba(120,80,140,.15);transition:transform .15s,background .2s}
+.tab.on{background:linear-gradient(120deg,var(--pink),var(--peach));color:#fff}
+.tab:hover{transform:translateY(-2px)}
+label.l{display:flex;justify-content:space-between;gap:8px;font-weight:600;margin:14px 0 4px;font-size:.92rem}
+label.l .v{color:#e0559b;white-space:nowrap}
+input[type=range]{width:100%;accent-color:var(--pink)}
+.layers{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+.layer{display:flex;align-items:center;gap:10px;border:0;border-radius:16px;padding:8px 12px;background:#fff;font:600 .88rem "Mali",sans-serif;color:var(--ink);cursor:pointer;text-align:left;box-shadow:0 3px 8px rgba(120,80,140,.12);transition:transform .15s}
+.layer:hover{transform:translateX(4px)}
+.layer.on{outline:3px solid var(--pink)}
+.dot{width:20px;height:20px;border-radius:50%;border:2px solid #fff;box-shadow:0 2px 5px rgba(0,0,0,.25);flex:none}
+.qc{background:#fff;border-radius:20px;padding:14px 16px;margin-top:12px;box-shadow:0 4px 12px rgba(120,80,140,.1)}
+.qc .q{font-weight:700;font-size:.93rem;margin-bottom:10px}
+.opt{display:block;width:100%;text-align:left;border:2px solid #f0e3f3;background:#fff9fd;border-radius:14px;padding:9px 12px;margin:6px 0;font:400 .88rem "Mali",sans-serif;color:var(--ink);cursor:pointer;transition:background .2s,border-color .2s}
+.opt:hover{background:#ffeaf5;border-color:var(--pink)}
+.opt.sel{background:#ffe0ef;border-color:var(--pink)}
+.opt.ok{background:#d6f7e8!important;border-color:var(--mint)!important}
+.opt.bad{background:#ffdcd6!important;border-color:#ff7a68!important}
+.go{border:0;border-radius:14px;padding:9px 18px;margin-top:6px;font:700 .9rem "Mali",sans-serif;color:#fff;cursor:pointer;background:linear-gradient(120deg,var(--mint),var(--sky))}
+.exp{display:none;margin-top:10px;padding:10px 12px;border-radius:14px;background:#fff4d6;border-left:6px solid var(--sun);font-size:.86rem}
+.exp.show{display:block;animation:pop .4s ease}
+.msg{color:#d6457f;font-size:.85rem;margin-top:6px;min-height:1.2em}
+@keyframes pop{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+button:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+@media(max-width:980px){.app{grid-template-columns:1fr}.stage{position:relative;top:0;height:68vh;min-height:440px}}
+@media(max-width:560px){.tip{display:none}}
+@media(prefers-reduced-motion:reduce){.hot{animation:none}.card,.exp.show{transition:none;animation:none}}
+</style>
+</head>
+<body>
+<div class="app">
+<section class="stage" id="stage">
+<canvas id="three" aria-label="โมเดลโลกกินได้แบบ 3 มิติที่ผ่าให้เห็นโครงสร้างภายใน"></canvas>
+<div class="hud glass"><b>โมเดลโลกกินได้ 🌎✨</b><span>วิทยาศาสตร์ ม.2 • สำรวจโครงสร้างโลก 3 มิติ</span></div>
+<div class="tip glass">ลากเพื่อหมุน • คลิกขวาลากเพื่อแพน • ลูกกลิ้งเมาส์เพื่อซูม • คลิกจุดสีหรือคลิกที่ชั้นเพื่ออ่าน</div>
+<div class="card glass" id="card" role="status" aria-live="polite"><button class="x" id="cardX" aria-label="ปิด">×</button><h3 id="cName"></h3><dl><dt>วัตถุดิบกินได้</dt><dd id="cMat"></dd><dt>สถานะ</dt><dd id="cState"></dd><dt>ความหนา</dt><dd id="cThick"></dd><dt>ลักษณะเด่น</dt><dd id="cFeat"></dd></dl></div>
+</section>
+<aside class="panel">
+<section class="box glass">
+<h2>🛠️ ตัวแปรและห้องแล็บโมเดล</h2>
+<p class="hint">เลือกวิธีแบ่งชั้นของโลก แล้วปรับตัวแปรเพื่อสังเกตการเปลี่ยนแปลงในฉาก 3 มิติ</p>
+<div class="tabs"><button class="tab on" id="tChem">ตามองค์ประกอบทางเคมี</button><button class="tab" id="tMech">ตามสมบัติเชิงกล</button></div>
+<label class="l" for="angle"><span>🔍 ตัวแปรที่ 1: มุมการผ่าชิ้นงาน (องศา)</span><span class="v" id="angleVal">90°</span></label>
+<input type="range" id="angle" min="0" max="180" value="90">
+<label class="l" for="temp"><span>🌡️ ตัวแปรที่ 2: อุณหภูมิและความดันภายใน</span><span class="v" id="tempVal">ปานกลาง</span></label>
+<input type="range" id="temp" min="1" max="3" value="2">
+</section>
+<section class="box glass">
+<h2>🍰 ชั้นโครงสร้างโลก</h2>
+<p class="hint">คลิกชื่อชั้นเพื่อเปิดการ์ดข้อมูล ชั้นที่เลือกจะเรืองแสงในฉาก</p>
+<div class="layers" id="layers"></div>
+</section>
+<section class="box glass">
+<h2>📝 แบบทดสอบประเมินความรู้ท้ายกิจกรรม (5 ข้อ)</h2>
+<div id="quiz"></div>
+</section>
+</aside>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+const $=id=>document.getElementById(id);
+const DATA={
+chem:[
+{name:"เปลือกโลก (Crust)",r:180,color:"#8a5a3c",mat:"ผงโกโก้/เปลือกคุกกี้บางกรอบ",state:"ของแข็ง",thick:"5 - 70 กม.",feat:"บางที่สุด มีธาตุซิลิคอนและอะลูมิเนียม/แมกนีเซียมเป็นหลัก"},
+{name:"เนื้อโลก (Mantle)",r:140,color:"#ff9b54",mat:"เนื้อเค้กแยมส้มหรือครีมหนานุ่ม",state:"ของแข็ง/พลาสติก",thick:"ประมาณ 2,885 กม.",feat:"ปริมาตรมากที่สุด ประกอบด้วยหินซิลิเกตเข้มข้น"},
+{name:"แก่นโลกชั้นนอก (Outer Core)",r:80,color:"#ffd23f",hot:1,mat:"ซอสคาราเมลหรือช็อกโกแลตเหลวเยิ้ม",state:"ของเหลว",thick:"ประมาณ 2,270 กม.",feat:"เหล็กและนิกเกิลหลอมเหลว เคลื่อนที่หมุนวนสร้างสนามแม่เหล็กโลก"},
+{name:"แก่นโลกชั้นใน (Inner Core)",r:40,color:"#fff3c9",mat:"ลูกอมช็อกโกแลตแข็งทรงกลม",state:"ของแข็ง",thick:"รัศมีประมาณ 1,216 กม.",feat:"ร้อนที่สุด หนาแน่นที่สุด แข็งตัวจากความดันมหาศาล"}],
+mech:[
+{name:"ธรณีภาค (Lithosphere)",r:180,color:"#5b8def",mat:"เปลือกคุกกี้ + ครีมชั้นบนสุดแข็งๆ",state:"ของแข็งเนื้อแกร่ง (Brittle Solid)",thick:"0 - 100 กม.",feat:"รวมเปลือกโลกและเนื้อโลกตอนบนสุดเข้าด้วยกัน แตกเป็นแผ่นเปลือกโลกได้"},
+{name:"ฐานธรณีภาค (Asthenosphere)",r:150,color:"#ff6b6b",hot:1,mat:"เยลลี่ดึ๋งๆ หรือมาร์ชแมลโลว์อุ่น",state:"ของแข็งสมบัติพลาสติก (Plastic)",thick:"100 - 660 กม.",feat:"มีความยืดหยุ่นสูง เกิดการพาความร้อนทำให้แผ่นเปลือกโลกเคลื่อนที่"},
+{name:"มัชฌิมภาค (Mesosphere)",r:110,color:"#d94f8a",mat:"เนื้อขนมปังอบแน่นๆ",state:"ของแข็งเนื้อแน่น",thick:"660 - 2,890 กม.",feat:"เนื้อโลกส่วนล่าง ร้อนและมีความดันสูงกว่าฐานธรณีภาคแต่ยังคงสภาพแข็งเกร็ง"},
+{name:"แก่นโลกชั้นนอก (Outer Core)",r:70,color:"#ffc83d",hot:1,mat:"น้ำเชื่อมเหลวหนืดเยิ้ม",state:"ของเหลว (Liquid)",thick:"2,270 กม.",feat:"คลื่น S-wave ผ่านไม่ได้เนื่องจากสถานะเป็นของเหลว"},
+{name:"แก่นโลกชั้นใน (Inner Core)",r:35,color:"#fff7e0",mat:"หมากฝรั่งก้อนกลมแกนกลาง",state:"ของแข็งเนื้อแน่นมาก (Solid)",thick:"1,216 กม.",feat:"ความดันบีบอัดจนอะตอมชิดกันถาวร"}]};
+const QUIZ=[
+{q:"1. หากเปรียบเทียบกิจกรรม \"โมเดลโลกกินได้\" ชิ้นส่วนของ \"เปลือกไข่ช็อกโกแลต\" ที่บางและแข็งอยู่ชั้นนอกสุด จะเทียบได้กับโครงสร้างโลกชั้นใดตามองค์ประกอบทางเคมี และมีสถานะใด?",o:["ก. เนื้อโลกตอนบน - ของแข็งเกร็ง","ข. เปลือกโลก (Crust) - ของแข็ง","ค. ธรณีภาค (Lithosphere) - พลาสติก","ง. แก่นโลกชั้นนอก - ของเหลว"],a:1,e:"ตอบ ข. เพราะเมื่อแบ่งตาม <strong>องค์ประกอบทางเคมี</strong> ชั้นนอกสุดคือ <strong>เปลือกโลก (Crust)</strong> ซึ่งมีสถานะเป็นของแข็งและมีความหนาน้อยที่สุดเมื่อเทียบกับชั้นอื่นๆ เช่นเดียวกับเปลือกช็อกโกแลตบางๆ ด้านนอกสุดของโมเดลขนม"},
+{q:"2. เมื่อนักเรียนปรับสไลเดอร์ \"อุณหภูมิและความดันภายใน\" ให้สูงขึ้น พบว่าเยลลี่หรือลาวาช็อกโกแลตในชั้นฐานธรณีภาค (Asthenosphere) เริ่มไหลตัวได้ดี ลักษณะนี้สะท้อนสมบัติเชิงกลของชั้นดังกล่าวอย่างไร?",o:["ก. เป็นของแข็งเนื้อแกร่งหลอมละลายสมบูรณ์","ข. เป็นแก่นโลกชั้นในที่มีความหนาแน่นสูงสุด","ค. เป็นของแข็งที่มีสมบัติเป็นพลาสติก (Plasticity) สามารถเคลื่อนที่หมุนวนด้วยการพาความร้อนได้","ง. เป็นของเหลวบริสุทธิ์เหมือนน้ำปั่น"],a:2,e:"ตอบ ค. ฐานธรณีภาค (Asthenosphere) เป็นของแข็งที่อยู่ภายใต้ความร้อนและความดันสูงมาก ทำให้มีสมบัติอ่อนตัวคล้ายพลาสติกเหนียวข้น (Plastic behavior) สามารถไหลหรือเกิดการพาความร้อน (Convection current) ดันให้แผ่นธรณีภาคด้านบนเคลื่อนที่ได้"},
+{q:"3. การแบ่งโครงสร้างโลกโดยใช้ \"สมบัติเชิงกล\" และ \"องค์ประกอบทางเคมี\" มีความแตกต่างกันในข้อใดที่ชัดเจนที่สุด?",o:["ก. การแบ่งทางเคมีเน้นสถานะของแข็งและของเหลว แต่สมบัติเชิงกลเน้นแร่ซิลิกา","ข. การแบ่งตามองค์ประกอบทางเคมีแบ่งได้ 5 ชั้น ส่วนสมบัติเชิงกลแบ่งได้ 3 ชั้น","ค. การแบ่งตามองค์ประกอบทางเคมีเน้นชนิดของสารประกอบ (เช่น ซิลิกา, เหล็ก) ส่วนสมบัติเชิงกลพิจารณาจากการตอบสนองต่อแรง อุณหภูมิ และสถานะ (เช่น ธรณีภาค, ฐานธรณีภาค)","ง. ทั้งสองแบบไม่มีความแตกต่างกันเลย สามารถใช้สลับคำกันได้ทุกประการ"],a:2,e:"ตอบ ค. การแบ่งตามองค์ประกอบทางเคมีจะจำแนกตามประเภทของธาตุและแร่หลัก (เปลือกโลก, เนื้อโลก, แก่นโลก) ส่วนสมบัติเชิงกลจะใช้การเปลี่ยนแปลงสถานะและความแข็งเกร็งตามความลึก (ธรณีภาค, ฐานธรณีภาค, มัชฌิมภาค, แก่นโลกชั้นนอก, แก่นโลกชั้นใน)"},
+{q:"4. ส่วนเนื้อในของขนมชั้นในสุดที่เป็น \"ลูกอมช็อกโกแลตทรงกลมแข็ง\" ในสภาวะปกติเทียบได้กับ \"แก่นโลกชั้นใน\" เหตุใดชั้นนี้จึงมีสถานะเป็นของแข็งทั้งที่มีอุณหภูมิสูงที่สุดในโลก?",o:["ก. เพราะประกอบด้วยก๊าซฮีเลียมที่เย็นจัด","ข. เพราะได้รับความกดดันจากมวลสารชั้นบนทับถมกันมากจนทำให้อนุภาคเหล็กและนิเกิลบีบอัดตัวแน่นเป็นของแข็ง","ค. เพราะความดันต่ำมากทำให้แร่ธาตุแข็งตัว","ง. เพราะไม่มีความร้อนหลงเหลืออยู่เลยที่ใจกลางโลก"],a:1,e:"ตอบ ข. แม้ว่าแก่นโลกชั้นในจะมีอุณหภูมิสูงเกินจุดหลอมเหลวของเหล็ก แต่เนื่องจากอยู่ลึกที่สุด จึงได้รับความกดดันมหาศาล (Overburden Pressure) บีบอัดจนอะตอมไม่สามารถเคลื่อนที่ได้อย่างของเหลว ส่งผลให้มันคงสถานะเป็นของแข็งนั่นเอง"},
+{q:"5. \"แก่นโลกชั้นนอก (Outer Core)\" ซึ่งในโมเดลกินได้อาจใช้ \"น้ำเชื่อมช็อกโกแลตเหลวเยิ้ม\" มีความสำคัญอย่างไรต่อปรากฏการณ์ของโลกตามที่นักเรียนได้สังเกตและวิเคราะห์?",o:["ก. เป็นแหล่งกำเนิดของหินงอกหินย้อย","ข. การหมุนวนของเหล็กเหลวในชั้นนี้ทำให้เกิดสนามแม่เหล็กโลก (Geodynamo) ช่วยปกป้องโลกจากลมสุริยะ","ค. ทำให้เกิดน้ำพุร้อนปะทุขึ้นมาบนเปลือกโลกโดยตรง","ง. ไม่มีหน้าที่สำคัญ เป็นเพียงชั้นทางผ่านของคลื่นแผ่นดินไหวเท่านั้น"],a:1,e:"ตอบ ข. แก่นโลกชั้นนอกมีสถานะเป็นของเหลว ประกอบด้วยเหล็กและนิกเกิลหลอมละลาย การหมุนเวียนพาความร้อนของสารโลหะนำไฟฟ้าเหล่านี้ประกอบกับการหมุนรอบตัวเองของโลก ก่อให้เกิดกระแสไฟฟ้าและสนามแม่เหล็กโลกที่คอยปกป้องสิ่งมีชีวิตจากรังสีในอวกาศ"}];
+const picked={};
+QUIZ.forEach((it,qi)=>{
+ const c=document.createElement('div');c.className='qc';
+ c.innerHTML='<div class="q">'+it.q+'</div>'+it.o.map((t,oi)=>'<button class="opt" data-q="'+qi+'" data-o="'+oi+'">'+t+'</button>').join('')+'<button class="go" data-check="'+qi+'">ตรวจคำตอบ</button><div class="msg" id="msg'+qi+'" aria-live="polite"></div><div class="exp" id="exp'+qi+'"><strong>เฉลยอย่างละเอียด:</strong> '+it.e+'</div>';
+ $('quiz').appendChild(c);
+});
+$('quiz').addEventListener('click',e=>{
+ const o=e.target.closest('.opt'),g=e.target.closest('.go');
+ if(o){
+  const q=+o.dataset.q;picked[q]=+o.dataset.o;
+  o.parentElement.querySelectorAll('.opt').forEach(b=>b.classList.toggle('sel',b===o));
+  $('msg'+q).textContent='';
+ }
+ if(g){
+  const q=+g.dataset.check;
+  if(picked[q]===undefined){$('msg'+q).textContent='เลือกคำตอบก่อนตรวจนะ';return}
+  g.parentElement.querySelectorAll('.opt').forEach((b,i)=>{
+   b.classList.remove('sel');
+   if(i===QUIZ[q].a)b.classList.add('ok');
+   else if(i===picked[q])b.classList.add('bad');
+  });
+  $('msg'+q).textContent=picked[q]===QUIZ[q].a?'ถูกต้อง เก่งมาก! 🎉':'ยังไม่ถูก ลองอ่านเฉลยดูนะ';
+  $('exp'+q).classList.add('show');
+ }
+});
+const stage=$('stage'),cv=$('three');
+const renderer=new THREE.WebGLRenderer({canvas:cv,antialias:true,alpha:true});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+renderer.outputEncoding=THREE.sRGBEncoding;
+const scene=new THREE.Scene();
+const camera=new THREE.PerspectiveCamera(42,1,.1,100);
+const home={p:new THREE.Vector3(0,3.2,12),t:new THREE.Vector3(0,-.6,0)};
+camera.position.copy(home.p);
+const controls=new THREE.OrbitControls(camera,cv);
+controls.enableDamping=true;controls.dampingFactor=.08;controls.enablePan=true;controls.enableZoom=true;
+controls.minDistance=5;controls.maxDistance=24;controls.maxPolarAngle=Math.PI*.52;
+controls.target.copy(home.t);controls.update();
+scene.add(new THREE.HemisphereLight(0xfff0f6,0xc9b4ff,.85));
+scene.add(new THREE.AmbientLight(0xffffff,.35));
+const sun=new THREE.DirectionalLight(0xfff3e0,1.0);
+sun.position.set(5,10,8);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);
+sun.shadow.camera.left=-9;sun.shadow.camera.right=9;sun.shadow.camera.top=9;sun.shadow.camera.bottom=-9;
+sun.shadow.camera.near=1;sun.shadow.camera.far=30;sun.shadow.bias=-.0004;sun.shadow.radius=4;
+scene.add(sun);
+const rim=new THREE.PointLight(0xff9ad0,.7,30);rim.position.set(-8,3,-6);scene.add(rim);
+const core=new THREE.PointLight(0xff7a2f,0,9);scene.add(core);
+const ground=new THREE.Mesh(new THREE.CircleGeometry(30,64),new THREE.MeshStandardMaterial({color:0xfff1f7,roughness:1}));
+ground.rotation.x=-Math.PI/2;ground.position.y=-3.62;ground.receiveShadow=true;scene.add(ground);
+const plate=new THREE.Mesh(new THREE.CylinderGeometry(4.4,4.7,.3,64),new THREE.MeshStandardMaterial({color:0xffffff,roughness:.35}));
+plate.position.y=-3.45;plate.receiveShadow=true;plate.castShadow=true;scene.add(plate);
+const rimRing=new THREE.Mesh(new THREE.TorusGeometry(4.4,.07,16,96),new THREE.MeshStandardMaterial({color:0xff7eb6,roughness:.4}));
+rimRing.rotation.x=Math.PI/2;rimRing.position.y=-3.3;scene.add(rimRing);
+const sprinkleCols=[0xff7eb6,0x5db7ff,0xffc83d,0x4fd1a5,0xb18cff];
+for(let i=0;i<26;i++){
+ const m=new THREE.Mesh(new THREE.CylinderGeometry(.05,.05,.28,8),new THREE.MeshStandardMaterial({color:sprinkleCols[i%5],roughness:.4}));
+ const a=Math.random()*Math.PI*2,d=3.4+Math.random()*.8;
+ m.position.set(Math.cos(a)*d,-3.25,Math.sin(a)*d);m.rotation.set(Math.PI/2,0,Math.random()*Math.PI);
+ m.castShadow=true;scene.add(m);
+}
+const pivot=new THREE.Group();scene.add(pivot);
+const earth=new THREE.Group();pivot.add(earth);
+let mode='chem',mats=[],meshes=[],anchors=[],sel=-1,pop=1,targetRot=0;
+const RS=3/180;
+function build(){
+ while(earth.children.length)earth.remove(earth.children[0]);
+ mats=[];meshes=[];anchors=[];
+ const cut=Number($('angle').value),L=Math.PI*2-cut*Math.PI/180;
+ const layers=DATA[mode];
+ layers.forEach((ly,i)=>{
+  const R=ly.r*RS,Rin=i<layers.length-1?layers[i+1].r*RS:0;
+  const mat=new THREE.MeshPhysicalMaterial({color:ly.color,roughness:.38,clearcoat:.6,clearcoatRoughness:.3,side:THREE.DoubleSide,emissive:ly.hot?0xff5a1f:0xffffff,emissiveIntensity:0});
+  mats.push(mat);
+  const s=new THREE.Mesh(new THREE.SphereGeometry(R,72,56,0,L),mat);
+  s.castShadow=true;s.receiveShadow=true;s.userData.i=i;earth.add(s);meshes.push(s);
+  if(cut>0){
+   for(let k=0;k<2;k++){
+    const cap=new THREE.Mesh(new THREE.RingGeometry(Math.max(Rin,.0001),R,64,1,Math.PI/2,Math.PI),mat);
+    cap.rotation.y=k===0?0:L;cap.receiveShadow=true;cap.userData.i=i;earth.add(cap);meshes.push(cap);
+   }
+  }
+  const an=new THREE.Object3D();an.position.set(-(R+Rin)/2,0,.02);earth.add(an);anchors.push(an);
+ });
+ const phiC=Math.PI*2-cut*Math.PI/360;
+ targetRot=cut>0?-Math.atan2(-Math.cos(phiC),Math.sin(phiC)):0;
+ applyTemp();
+}
+function applyTemp(){
+ const t=Number($('temp').value);
+ $('tempVal').textContent=t===1?'ต่ำ (หนืดตัวมาก)':t===3?'สูงมาก (หลอมละลายคล้ายลาวาเยิ้ม)':'ปานกลาง';
+ core.intensity=[0,.5,1.6][t-1];
+}
+function hotBase(){return [0,.18,.6][Number($('temp').value)-1]}
+const hotspots=[],list=$('layers');
+function buildUI(){
+ document.querySelectorAll('.hot').forEach(b=>b.remove());hotspots.length=0;list.innerHTML='';
+ DATA[mode].forEach((ly,i)=>{
+  const b=document.createElement('button');b.className='hot';b.textContent=i+1;b.style.background=ly.color;b.setAttribute('aria-label','ข้อมูล'+ly.name);
+  if(ly.color==='#fff3c9'||ly.color==='#fff7e0')b.style.color='#7a5a20';
+  b.addEventListener('click',()=>openCard(i));stage.appendChild(b);hotspots.push(b);
+  const r=document.createElement('button');r.className='layer';r.dataset.i=i;
+  r.innerHTML='<span class="dot" style="background:'+ly.color+'"></span><span>'+(i+1)+'. '+ly.name+'</span>';
+  r.addEventListener('click',()=>openCard(i));list.appendChild(r);
+ });
+}
+const card=$('card');
+function openCard(i){
+ if(sel===i){closeCard();return}
+ sel=i;const ly=DATA[mode][i];
+ $('cName').textContent=ly.name;$('cMat').textContent=ly.mat;$('cState').textContent=ly.state;$('cThick').textContent=ly.thick;$('cFeat').textContent=ly.feat;
+ card.style.borderLeftColor=ly.color;
+ card.classList.remove('show');void card.offsetWidth;card.classList.add('show');
+ document.querySelectorAll('.layer').forEach(el=>el.classList.toggle('on',+el.dataset.i===i));
+}
+function closeCard(){sel=-1;card.classList.remove('show');document.querySelectorAll('.layer').forEach(el=>el.classList.remove('on'))}
+$('cardX').addEventListener('click',closeCard);
+function setMode(m){
+ mode=m;closeCard();
+ $('tChem').classList.toggle('on',m==='chem');$('tMech').classList.toggle('on',m==='mech');
+ buildUI();build();pop=.78;
+}
+$('tChem').addEventListener('click',()=>setMode('chem'));
+$('tMech').addEventListener('click',()=>setMode('mech'));
+$('angle').addEventListener('input',()=>{$('angleVal').textContent=$('angle').value+'°';build()});
+$('temp').addEventListener('input',applyTemp);
+const ray=new THREE.Raycaster(),mp=new THREE.Vector2();let down=null;
+cv.addEventListener('pointerdown',e=>{down={x:e.clientX,y:e.clientY}});
+cv.addEventListener('pointerup',e=>{
+ if(!down)return;
+ const moved=Math.hypot(e.clientX-down.x,e.clientY-down.y);down=null;
+ if(moved>5)return;
+ const r=cv.getBoundingClientRect();
+ mp.set(((e.clientX-r.left)/r.width)*2-1,-((e.clientY-r.top)/r.height)*2+1);
+ ray.setFromCamera(mp,camera);
+ const hit=ray.intersectObjects(meshes,false)[0];
+ if(hit)openCard(hit.object.userData.i);
+});
+const wv=new THREE.Vector3();
+function resize(){
+ const r=stage.getBoundingClientRect();
+ renderer.setSize(r.width,r.height,false);
+ camera.aspect=r.width/r.height;camera.updateProjectionMatrix();
+}
+new ResizeObserver(resize).observe(stage);
+$('stage').addEventListener('dblclick',()=>{camera.position.copy(home.p);controls.target.copy(home.t)});
+function loop(t){
+ requestAnimationFrame(loop);
+ const s=t/1000;
+ pop+=(1-pop)*.12;pivot.scale.setScalar(pop);
+ pivot.position.y=Math.sin(s*1.3)*.07;
+ let d=targetRot-earth.rotation.y;
+ d=Math.atan2(Math.sin(d),Math.cos(d));earth.rotation.y+=d*.12;
+ const base=hotBase(),pulse=.5+.5*Math.sin(s*3);
+ mats.forEach((m,i)=>{
+  const ly=DATA[mode][i];
+  let e=ly.hot?base*(.8+.4*pulse):0;
+  if(i===sel)e+=.18+.22*pulse;
+  m.emissiveIntensity=e;
+ });
+ const cutOn=Number($('angle').value)>5;
+ hotspots.forEach((b,i)=>{
+  b.classList.toggle('off',!cutOn);
+  anchors[i].getWorldPosition(wv);
+  core.position.set(0,pivot.position.y,0);
+  wv.project(camera);
+  const r=stage.getBoundingClientRect();
+  b.style.left=((wv.x+1)/2*r.width)+'px';b.style.top=((1-wv.y)/2*r.height)+'px';
+  b.style.visibility=wv.z<1?'visible':'hidden';
+ });
+ controls.update();
+ renderer.render(scene,camera);
+}
+resize();buildUI();build();
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
